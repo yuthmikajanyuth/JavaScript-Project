@@ -83,7 +83,7 @@ function addTransaction(e, descriptionEl, amountEl, categoryEl, dateEl) {
   transactions.push(newTransaction);
   updateLocalStorage();
 }
-  transaction.push(newTransaction);
+{ transaction.push(newTransaction);
   updateLocalStorage();
 }
 

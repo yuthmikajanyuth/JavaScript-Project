@@ -58,17 +58,31 @@ function addTransaction(e, descriptionEl, amountEl, categoryEl, dateEl) {
 
   const amount = parseFloat(amountEl.value);
 
-  const description = descriptionEl.value;
+  if (isNaN(amount)) {
+    alert("Please enter a valid amount");
+    return;
+  }
+
+  const description = descriptionEl.value.trim();
+  if (!description) {
+    alert("Please enter a valid description");
+    return;
+  }
+
   const category = categoryEl.value;
   const date = dateEl.value;
 
   const newTransaction = {
+    id: generateID(), // Add unique ID
     description,
     amount,
     category,
     date,
   };
 
+  transactions.push(newTransaction);
+  updateLocalStorage();
+}
   transaction.push(newTransaction);
   updateLocalStorage();
 }
@@ -80,7 +94,7 @@ function generateID() {
 
 // Update local storage
 function updateLocalStorage() {
-  localStorage.setItem("transactions", transactions);
+  localStorage.setItem("transactions", JSON.stringify(transactions));
 }
 
 // Remove transaction
@@ -94,9 +108,7 @@ function removeTransaction(id) {
 function updateValues(balanceEl, incomeEl, expenseEl) {
   const amounts = transactions.map((transaction) => transaction.amount);
 
-  const total = amounts.reduce((acc, amount) => {
-    return (acc = amount);
-  }, 0);
+  const total = amounts.reduce((acc, amount) => acc + amount, 0);
 
   const income = amounts
     .filter((amount) => amount > 0)
@@ -104,13 +116,12 @@ function updateValues(balanceEl, incomeEl, expenseEl) {
 
   const expense = amounts
     .filter((amount) => amount < 0)
-    .reduce((acc, amount) => acc - amount, 0);
+    .reduce((acc, amount) => acc + Math.abs(amount), 0);
 
-  balanceEl.textContent = `Rs ${total}`;
-  incomeEl.textContent = `+Rs ${income}`;
-  expenseEl.textContent = `-Rs ${Math.abs(expense)}`;
+  balanceEl.textContent = `Rs ${total.toFixed(2)}`;
+  incomeEl.textContent = `+Rs ${income.toFixed(2)}`;
+  expenseEl.textContent = `-Rs ${expense.toFixed(2)}`;
 }
-
 // Add transactions to DOM
 function addTransactionDOM(transaction, transactionListEl) {
   const sign = "-";

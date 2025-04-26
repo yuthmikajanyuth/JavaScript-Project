@@ -271,6 +271,11 @@ function generateReport() {
   let reportText = "Budget Report\n\n";
 
   // Summary
+// summary category
+  if (!categorySummary[transaction.category]) {
+  categorySummary[transaction.category] = 0;
+}
+  
   const totalIncome = transactions
     .filter((t) => t.amount > 0)
     .reduce((acc, t) => acc + t.amount, 0);
@@ -439,12 +444,9 @@ function updateCategoryDropdowns(categoryDropdowns) {
       );
     });
 
-    if (
-      currentValue &&
-      dropdown.querySelector(`option[value="${currentValue}"]`)
-    ) {
-      dropdown.value = currentValue;
-    }
+    if (currentValue && dropdown.querySelector(`option[value="${currentValue}"]`)) {
+  dropdown.value = currentValue;
+}
   });
 }
 

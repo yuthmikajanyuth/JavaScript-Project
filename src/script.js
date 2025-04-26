@@ -36,7 +36,7 @@ function init() {
 }
 
 function getTransactionsFromStorage() {
-  let transactions = localStorage.getItem("transaction");
+  let transactions = localStorage.getItem("transactions"); // Fixed key name
   return transactions ? JSON.parse(transactions) : [];
 }
 
@@ -57,20 +57,21 @@ function addTransaction(e, descriptionEl, amountEl, categoryEl, dateEl) {
   e.preventDefault();
 
   const amount = parseFloat(amountEl.value);
-
   const description = descriptionEl.value;
   const category = categoryEl.value;
   const date = dateEl.value;
 
   const newTransaction = {
+    id: generateID(), // Added ID for each transaction
     description,
     amount,
     category,
     date,
   };
 
-  transaction.push(newTransaction);
+  transactions.push(newTransaction); // Fixed from transaction.push to transactions.push
   updateLocalStorage();
+  init(); // Reinitialize to update the UI
 }
 
 // Generate unique ID
@@ -80,7 +81,7 @@ function generateID() {
 
 // Update local storage
 function updateLocalStorage() {
-  localStorage.setItem("transactions", transactions);
+  localStorage.setItem("transactions", JSON.stringify(transactions)); // Fixed to stringify transactions
 }
 
 // Remove transaction
@@ -94,30 +95,21 @@ function removeTransaction(id) {
 function updateValues(balanceEl, incomeEl, expenseEl) {
   const amounts = transactions.map((transaction) => transaction.amount);
 
-  const total = amounts.reduce((acc, amount) => {
-    return (acc = amount);
-  }, 0);
+  const total = amounts.reduce((acc, amount) => acc + amount, 0); // Fixed to sum all amounts
+  const income = amounts.filter((amount) => amount > 0).reduce((acc, amount) => acc + amount, 0);
+  const expense = amounts.filter((amount) => amount < 0).reduce((acc, amount) => acc + amount, 0);
 
-  const income = amounts
-    .filter((amount) => amount > 0)
-    .reduce((acc, amount) => acc + amount, 0);
-
-  const expense = amounts
-    .filter((amount) => amount < 0)
-    .reduce((acc, amount) => acc - amount, 0);
-
-  balanceEl.textContent = `Rs ${total}`;
-  incomeEl.textContent = `+Rs ${income}`;
-  expenseEl.textContent = `-Rs ${Math.abs(expense)}`;
+  balanceEl.textContent = `Rs ${total.toFixed(2)}`; // Fixed to show two decimal places
+  incomeEl.textContent = `+Rs ${income.toFixed(2)}`;
+  expenseEl.textContent = `-Rs ${Math.abs(expense).toFixed(2)}`;
 }
 
 // Add transactions to DOM
 function addTransactionDOM(transaction, transactionListEl) {
-  const sign = "-";
+  const sign = transaction.amount < 0 ? "-" : "+";
 
   const item = document.createElement("li");
-
-  item.className = transaction.category === "income" ? "expense" : "income";
+  item.className = transaction.amount < 0 ? "expense" : "income"; // Fixed class assignment
 
   const detailsDiv = document.createElement("div");
   detailsDiv.className = "details";
@@ -137,20 +129,6 @@ function addTransactionDOM(transaction, transactionListEl) {
   detailsDiv.appendChild(descSpan);
   detailsDiv.appendChild(catSpan);
   detailsDiv.appendChild(dateSpan);
-
-  const amountSpan = document.createElement("span");
-  amountSpan.className = "amount";
-  amountSpan.textContent = `${sign}Rs ${Math.abs(transaction.amount).toFixed(
-    2
-  )}`;
-
-  let deleteBtn = document.createElement("button");
-  deleteBtn.className = "delete-btn";
-  deleteBtn.textContent = "×";
-
-  item.appendChild(detailsDiv);
-  item.appendChild(amountSpan);
-  item.appendChild(deleteBtn);
 
   // Don't change the following line
   transactionListEl.insertAdjacentHTML("beforeend", item.outerHTML);
